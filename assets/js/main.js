@@ -1,97 +1,143 @@
-(function () {
-  "use strict";
-
-  /*
-  -----------------------------------------
-  Sticky Header Shadow On Scroll
-  -----------------------------------------
-  */
-
-  const header = document.querySelector(".main-header");
-
-  function handleHeaderScroll() {
-    if (!header) return;
-
-    if (window.scrollY > 40) {
-      header.classList.add("scrolled");
-    } else {
-      header.classList.remove("scrolled");
-    }
-  }
-
-  window.addEventListener("scroll", handleHeaderScroll);
-  handleHeaderScroll();
-
-
-  /*
-  -----------------------------------------
-  Close Mobile Menu After Link Click
-  -----------------------------------------
-  */
-
-  const navLinks = document.querySelectorAll(".navbar-nav .nav-link, .navbar-nav .dropdown-item");
-  const navbarCollapse = document.querySelector(".navbar-collapse");
+// navbar js
+document.addEventListener("DOMContentLoaded", function () {
+  const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
+  const navbarCollapse = document.getElementById("mainNavbar");
 
   navLinks.forEach(function (link) {
     link.addEventListener("click", function () {
-      if (!navbarCollapse) return;
+      navLinks.forEach(function (item) {
+        item.classList.remove("active");
+      });
 
-      if (navbarCollapse.classList.contains("show")) {
-        const collapseInstance = bootstrap.Collapse.getInstance(navbarCollapse);
+      this.classList.add("active");
 
-        if (collapseInstance) {
-          collapseInstance.hide();
+      if (navbarCollapse && navbarCollapse.classList.contains("show")) {
+        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+        if (bsCollapse) {
+          bsCollapse.hide();
         }
       }
     });
   });
+});
+// navbar js end
 
+//  card-slider-js
+document.addEventListener("DOMContentLoaded", function () {
+  const track = document.getElementById("industriesSliderTrack");
+  const cards = document.querySelectorAll(".industry-slide-card");
+  const prevBtn = document.getElementById("industryPrevBtn");
+  const nextBtn = document.getElementById("industryNextBtn");
+  const dotsWrap = document.getElementById("industrySliderDots");
 
-  /*
-  -----------------------------------------
-  Basic Contact Form Validation Demo
-  Note: Replace this with backend/API integration.
-  -----------------------------------------
-  */
+  if (!track || cards.length === 0) return;
 
-  const enquiryForm = document.querySelector(".contact-form-box form");
+  let currentIndex = 0;
+  let autoSlide;
 
-  if (enquiryForm) {
-    enquiryForm.addEventListener("submit", function (event) {
-      event.preventDefault();
-
-      alert("Thank you. Your enquiry has been submitted successfully.");
-
-      enquiryForm.reset();
-    });
+  function getVisibleCards() {
+    if (window.innerWidth <= 575) return 1;
+    if (window.innerWidth <= 991) return 2;
+    return 3;
   }
 
+  function getMaxIndex() {
+    return Math.max(cards.length - getVisibleCards(), 0);
+  }
 
-  /*
-  -----------------------------------------
-  Smooth Scroll For Same Page Anchor Links
-  -----------------------------------------
-  */
+  function createDots() {
+    dotsWrap.innerHTML = "";
 
-  const anchorLinks = document.querySelectorAll('a[href^="#"]');
+    for (let i = 0; i <= getMaxIndex(); i++) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "industry-slider-dot";
+      dot.setAttribute("aria-label", "Go to industry slide " + (i + 1));
 
-  anchorLinks.forEach(function (anchor) {
-    anchor.addEventListener("click", function (event) {
-      const targetId = this.getAttribute("href");
+      dot.addEventListener("click", function () {
+        currentIndex = i;
+        updateSlider();
+        restartAutoSlide();
+      });
 
-      if (targetId === "#") return;
+      dotsWrap.appendChild(dot);
+    }
+  }
 
-      const targetElement = document.querySelector(targetId);
+  function updateSlider() {
+    const cardWidth = cards[0].offsetWidth;
+    const gap = 22;
+    const maxIndex = getMaxIndex();
 
-      if (targetElement) {
-        event.preventDefault();
+    if (currentIndex > maxIndex) {
+      currentIndex = maxIndex;
+    }
 
-        targetElement.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-      }
+    track.style.transform = "translateX(-" + currentIndex * (cardWidth + gap) + "px)";
+
+    cards.forEach(function (card) {
+      card.classList.remove("active");
     });
+
+    cards[currentIndex].classList.add("active");
+
+    const dots = dotsWrap.querySelectorAll(".industry-slider-dot");
+    dots.forEach(function (dot) {
+      dot.classList.remove("active");
+    });
+
+    if (dots[currentIndex]) {
+      dots[currentIndex].classList.add("active");
+    }
+  }
+
+  function nextSlide() {
+    currentIndex++;
+
+    if (currentIndex > getMaxIndex()) {
+      currentIndex = 0;
+    }
+
+    updateSlider();
+  }
+
+  function prevSlide() {
+    currentIndex--;
+
+    if (currentIndex < 0) {
+      currentIndex = getMaxIndex();
+    }
+
+    updateSlider();
+  }
+
+  function startAutoSlide() {
+    autoSlide = setInterval(nextSlide, 3500);
+  }
+
+  function restartAutoSlide() {
+    clearInterval(autoSlide);
+    startAutoSlide();
+  }
+
+  nextBtn.addEventListener("click", function () {
+    nextSlide();
+    restartAutoSlide();
   });
 
-})();
+  prevBtn.addEventListener("click", function () {
+    prevSlide();
+    restartAutoSlide();
+  });
+
+  window.addEventListener("resize", function () {
+    createDots();
+    updateSlider();
+  });
+
+  createDots();
+  updateSlider();
+  startAutoSlide();
+});
+
+//  card-slider-js end
