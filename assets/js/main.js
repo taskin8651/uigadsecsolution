@@ -141,3 +141,48 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 //  card-slider-js end
+
+
+const aboutHeroElements = document.querySelectorAll(
+  ".about-hero-content, .about-hero-visual, .about-stat-box"
+);
+
+if (aboutHeroElements.length) {
+  aboutHeroElements.forEach(function (item, index) {
+    item.style.transitionDelay = (index * 0.08) + "s";
+  });
+}
+
+
+/*
+-----------------------------------------
+Company Overview Reveal Animation
+-----------------------------------------
+*/
+
+const companyRevealItems = document.querySelectorAll(
+  ".company-overview-premium .reveal-up"
+);
+
+if (companyRevealItems.length) {
+  companyRevealItems.forEach(function (item, index) {
+    item.style.transitionDelay = (index % 6) * 0.08 + "s";
+  });
+
+  const companyRevealObserver = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("show");
+        }
+      });
+    },
+    {
+      threshold: 0.15
+    }
+  );
+
+  companyRevealItems.forEach(function (item) {
+    companyRevealObserver.observe(item);
+  });
+}
